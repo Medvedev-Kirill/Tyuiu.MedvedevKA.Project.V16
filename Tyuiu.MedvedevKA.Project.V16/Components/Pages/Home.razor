@@ -1,0 +1,48 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager navigate
+
+
+<PageTitle>Главная</PageTitle>
+
+<h1>Проект</h1>
+
+<div>Вариант 16.</div> 
+<div>Название проекта: "Товарный учёт"</div>
+
+<div>Описание проекта: Приложение для отслеживания движений товаров в магазине.</div>
+
+<div>Техническое задание:</div>
+    <div>• Реализовать классы для товаров, сотрудников и операций.</div>
+        <div>• Создать интерфейс для ввода и анализа инвентаризаций.</div>
+            <div>• Включить функцию генерации отчетов по продажам.</div>
+                <div>• Использовать Blazor в качестве Web-интерфейса и для интуитивного мониторинга запасов.</div>
+
+<div class="button-container">
+    <button class="btn btn-primary" @onclick="NavigateInventory">Товары</button>
+    <button class="btn btn-primary" @onclick="NavigateEmployee">Сотрудники</button>
+    <button class="btn btn-primary" @onclick="NavigateOperation">Операции</button>
+    <button class="btn btn-primary" @onclick="NavigateReport">Отчёт</button>
+</div>
+
+@code{
+    void NavigateOperation()
+    {
+        navigate.NavigateTo("/operation");
+    }
+
+    void NavigateEmployee()
+    {
+        navigate.NavigateTo("/employee");
+    }
+
+    void NavigateInventory()
+    {
+        navigate.NavigateTo("/inventory");
+    }
+    
+    void NavigateReport()
+    {
+        navigate.NavigateTo("/report");
+    }
+}

@@ -1,0 +1,64 @@
+﻿@page "/report"
+@inject ISalesDataService SalesDataService
+
+<h3>Отчет о продажах</h3>
+
+<EditForm Model="@reportParameters" OnValidSubmit="GenerateReport" @key=1>
+    <!-- Added unique key -->
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="startDate">Дата начала:</label>
+        <InputDate id="startDate" @bind-Value="reportParameters.StartDate" />
+    </div>
+
+    <div class="form-group">
+        <label for="endDate">Дата окончания:</label>
+        <InputDate id="endDate" @bind-Value="reportParameters.EndDate" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сгенерировать отчет НЕ РАБОТАЕТ</button>
+</EditForm>
+
+@if (reportResult == null)
+{
+    <p><em>Пожалуйста, укажите даты для генерации отчета.</em></p>
+}
+else
+{
+    @if (reportResult == "За указанный период продажи отсутствуют.")
+    {
+        <p><em>@reportResult</em></p>
+    }
+    else
+    {
+        <pre>@reportResult</pre>
+    }
+}
+
+
+@code {
+    private ReportParameters reportParameters = new();
+    private string? reportResult;
+
+    private async Task GenerateReport()
+    {
+        try
+        {
+            reportResult = await SalesDataService.GenerateSalesReportAsync(reportParameters.StartDate, reportParameters.EndDate);
+        }
+        catch (Exception ex)
+        {
+            reportResult = $"Произошла ошибка: {ex.Message}";
+        }
+    }
+
+    public class ReportParameters
+    {
+        public DateTime StartDate { get; set; } = DateTime.Now.AddMonths(-1);
+        public DateTime EndDate { get; set; } = DateTime.Now;
+    }
+}
+
+

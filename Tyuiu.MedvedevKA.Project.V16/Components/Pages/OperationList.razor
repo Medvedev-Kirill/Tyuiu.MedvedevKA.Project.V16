@@ -1,0 +1,85 @@
+﻿@page "/operation"
+@rendermode InteractiveServer
+@inject NavigationManager navigate
+@inject IInventoryDataService inventory
+
+<PageTitle>Оперции</PageTitle>
+
+<h1>Операции</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ID Товара</th>
+            <th>ID Сотрудника</th>
+            <th>Дата</th>
+            <th>Тип Операции</th>
+            <th>Количество</th>
+            <th>Товар</th>
+            <th>Сотрудник</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (operations == null)
+        {
+            <tr>
+                <td colspan="8">Loading...</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var operation in operations)
+            {
+                <tr class="disabled">
+                    <td>@operation.Id</td>
+                    <td>@operation.ProductId.</td>
+                    <td>@operation.EmployeeId</td>
+                    <td>@operation.Date</td>
+                    <td>@operation.OperationType</td>
+                    <td>@operation.Quantity</td>
+                    <td>@operation.NameProduct.NameProduct</td>
+                    <td>@operation.Employee.FirstName @operation.Employee.LastName @operation.Employee.MiddleName</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteOperation(operation.Id))">Удалить</button>
+                    </td>
+                </tr>
+
+            }
+        }
+    </tbody>
+</table>
+
+<div style="margin-top: 10px; margin-right: 10px;">
+    <button class="btn btn-primary" @onclick="AddOperation">Добавить операцию</button>
+</div>
+@code {
+    IEnumerable<Operation>? operations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        operations = await inventory.GetOperationsAsync();
+    }
+
+    void AddOperation()
+    {
+        navigate.NavigateTo("/operation/add"); 
+    }
+    
+    async Task DeleteOperation(int operationId)
+    {
+        try
+        {
+            await inventory.DeleteOperationAsync(operationId);
+            operations = await inventory.GetOperationsAsync(); // Обновляем список после удаления
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions appropriately (e.g., display an error message)
+            Console.Error.WriteLine($"Error deleting product: {ex.Message}");
+        }
+    }
+
+}

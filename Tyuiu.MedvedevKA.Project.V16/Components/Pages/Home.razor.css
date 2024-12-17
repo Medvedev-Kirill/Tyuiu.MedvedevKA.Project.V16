@@ -1,0 +1,11 @@
+﻿.button-container {
+    display: flex;
+    justify-content: space-around; 
+    width: 100%; 
+    margin-top: 20px;
+}
+
+.button-container button {
+        flex: 1; 
+        margin: 0 5px; 
+}

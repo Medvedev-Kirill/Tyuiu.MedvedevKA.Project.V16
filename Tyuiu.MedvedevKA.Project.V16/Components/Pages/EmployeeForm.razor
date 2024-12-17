@@ -1,0 +1,89 @@
+﻿@page "/employee/add"
+@page "/employee/add/{EmployeeId:int}"
+@rendermode InteractiveServer
+@inject NavigationManager navigation
+@inject IInventoryDataService inventory
+
+@using Tyuiu.MedvedevKA.Project.V16.Data.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>@PageTitle</PageTitle>
+
+<h1>@PageTitle</h1>
+
+@if (newEmployee != null)
+{
+    <EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <InputNumber @bind-Value="newEmployee.EmployeeId" hidden />
+        <div class="form-group">
+            <label for="FirstName">Имя:</label>
+            <InputText id="FirstName" @bind-Value="newEmployee.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => newEmployee.FirstName)" />
+        </div>
+        <div class="form-group">
+            <label for="LastName">Фамилия:</label>
+            <InputText id="LastName" @bind-Value="newEmployee.LastName" class="form-control" />
+            <ValidationMessage For="@(() => newEmployee.LastName)" />
+        </div>
+        <div class="form-group">
+            <label for="MiddleName">Отчество:</label>
+            <InputText id="MiddleName" @bind-Value="newEmployee.MiddleName" class="form-control" />
+            <ValidationMessage For="@(() => newEmployee.MiddleName)" />
+        </div>
+        <div class="form-group">
+            <label for="Position">Должность:</label>
+            <InputText id="Position" @bind-Value="newEmployee.Position" class="form-control" />
+            <ValidationMessage For="@(() => newEmployee.Position)" />
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+            <button class="btn btn-secondary" @onclick="NavigateBack">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? EmployeeId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Employee newEmployee { get; set; } = new Employee(); // Initialize here
+
+    private string PageTitle => EmployeeId.HasValue ? "Редактировать сотрудника" : "Добавить сотрудника";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (EmployeeId.HasValue && EmployeeId > 0)
+        {
+            var employees = await inventory.GetEmployeesAsync(); // Await the task here
+            var employee = employees.FirstOrDefault(e => e.EmployeeId == EmployeeId); // Now call FirstOrDefault on IEnumerable
+            if (employee != null)
+            {
+                newEmployee = employee;
+            }
+            else
+            {
+                navigation.NavigateTo("/employee");
+            }
+        }
+    }
+
+    async Task HandleValidSubmit()
+    {
+        if (EmployeeId.HasValue && EmployeeId > 0)
+        {
+            await inventory.UpdateEmployeeAsync(newEmployee);
+        }
+        else
+        {
+            await inventory.AddEmployeeAsync(newEmployee);
+        }
+        navigation.NavigateTo("/employee");
+    }
+
+    private void NavigateBack() => navigation.NavigateTo("/employee");
+}

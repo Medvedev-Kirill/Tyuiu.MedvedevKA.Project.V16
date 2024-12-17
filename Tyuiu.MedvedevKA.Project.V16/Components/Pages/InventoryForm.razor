@@ -1,0 +1,111 @@
+﻿@page "/inventory/add"
+@page "/inventory/add/{ProductId:int}"
+@rendermode InteractiveServer
+@inject NavigationManager navigation
+@inject IInventoryDataService inventory
+
+@using Tyuiu.MedvedevKA.Project.V16.Data.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>@PageTitle</PageTitle>
+
+<h1>@PageTitle</h1>
+
+@if (newProduct != null)
+{
+    <EditForm Model="newProduct" FormName="ProductForm" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <InputNumber @bind-Value="newProduct.ProductId" hidden />
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Название</label>
+            <InputText @bind-Value="newProduct.NameProduct" class="form-control" />
+            <ValidationMessage For="() => newProduct.NameProduct" />
+        </div>
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Описание</label>
+            <InputTextArea @bind-Value="newProduct.Description" class="form-control" />
+            <ValidationMessage For="() => newProduct.Description" />
+        </div>
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Цена</label>
+            <InputNumber @bind-Value="newProduct.Price" class="form-control" />
+            <ValidationMessage For="() => newProduct.Price" />
+        </div>
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Количество</label>
+            <InputNumber @bind-Value="newProduct.Quantity" class="form-control" />
+            <ValidationMessage For="() => newProduct.Quantity" />
+        </div>
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Единица измерения</label>
+            <InputText @bind-Value="newProduct.Unit" class="form-control" />
+            <ValidationMessage For="() => newProduct.Unit" />
+        </div>
+        <div class="form-group d-flex justify-content-between m-2">
+            <label class="col-form-label col-3">Категория</label>
+            <InputText @bind-Value="newProduct.Category" class="form-control" />
+            <ValidationMessage For="() => newProduct.Category" />
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary m-2" type="submit">Сохранить</button>
+            <button class="btn btn-secondary m-2" @onclick="NavigateBack">Отмена</button>
+        </div>
+    </EditForm>
+}
+@code {
+    [Parameter]
+    public int? ProductId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Product? newProduct { get; set; }
+
+    private string PageTitle => ProductId.HasValue ? "Редактировать Товар" : "Добавить Товар";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        if (newProduct == null)
+        {
+            newProduct = new();
+            if (ProductId.HasValue && ProductId != 0)
+            {
+                var src = await inventory.GetProductsAsync();
+                newProduct = src.FirstOrDefault(x => x.ProductId == ProductId);
+                if (newProduct == null)
+                {
+                    navigation.NavigateTo("/inventory"); //Возврат на страницу инвентаря
+                }
+            }
+        }
+    }
+
+    async Task HandleValidSubmit()
+    {
+        
+        if (newProduct != null) // Check for null here
+        {
+            if (ProductId.HasValue && ProductId != 0)
+            {
+                await inventory.UpdateProductAsync(newProduct);
+            }
+            else
+            {
+                await inventory.AddProductAsync(newProduct);
+            }
+            navigation.NavigateTo("/inventory");
+        }
+        else
+        {
+            // Handle the case where newProduct is unexpectedly null (e.g., log an error)
+            Console.Error.WriteLine("Ошибка: значение NewProduct равно null в HandleValidSubmit");
+        }
+
+    }
+    private void NavigateBack()
+    {
+        navigation.NavigateTo("/inventory");
+    }
+}

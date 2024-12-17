@@ -1,0 +1,81 @@
+﻿@page "/inventory"
+@rendermode InteractiveServer
+@inject NavigationManager navigate
+@inject IInventoryDataService inventory
+
+<PageTitle>Инвениаризация</PageTitle>
+
+<h1>Инвентарь</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID Товара</th>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Цена</th>
+            <th>Количество</th>
+            <th>Единица измерения</th>
+            <th>Категория</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (products == null)
+        {
+            <tr>
+                <td colspan="8">Loading...</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.ProductId</td>
+                    <td>@product.NameProduct</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>@product.Quantity</td>
+                    <td>@product.Unit</td>
+                    <td>@product.Category</td>
+                    <td><button class="btn btn-danger btn-sm" @onclick="@(() => DeleteProduct(product.ProductId))">Удалить</button></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div style="margin-top: 10px; margin-right: 10px;">
+    <button class="btn btn-primary" @onclick="AddProduct">Добавить Товар</button>
+</div>
+
+@code {
+    IEnumerable<Product>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        products = await inventory.GetProductsAsync();
+    }
+
+    void AddProduct()
+    {
+        navigate.NavigateTo("/inventory/add");
+    }
+    
+    async Task DeleteProduct(int productId)
+    {
+        try
+        {
+            await inventory.DeleteProductAsync(productId);
+            products = await inventory.GetProductsAsync(); // Refresh the product list
+            StateHasChanged(); // Inform Blazor to re-render the UI
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions appropriately (e.g., display an error message)
+            Console.Error.WriteLine($"Error deleting product: {ex.Message}");
+        }
+    }
+}

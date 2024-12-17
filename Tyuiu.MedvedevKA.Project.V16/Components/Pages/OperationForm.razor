@@ -1,0 +1,151 @@
+﻿@page "/operation/add"
+@page "/operation/add/{OperationId:int}"
+@rendermode InteractiveServer
+@inject NavigationManager navigation
+@inject IInventoryDataService inventory
+@inject IJSRuntime jsRuntime
+
+@using Tyuiu.MedvedevKA.Project.V16.Data.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>@PageTitle</PageTitle>
+
+<h1>@PageTitle</h1>
+
+@if (newOperation != null && products != null && employees != null)
+{
+    <EditForm Model="newOperation" FormName="OperationForm" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <InputNumber @bind-Value="newOperation.Id" hidden />
+
+        <div class="form-group d-flex m-2">
+            <!-- Изменено: удален justify-content-between -->
+            <label class="col-form-label col-3">Товар:</label>
+            <InputSelect @bind-Value="newOperation.ProductId">
+                @foreach (var product in products)
+                {
+                    <option value="@product.ProductId">@product.NameProduct</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => newOperation.ProductId)" />
+        </div>
+
+        <div class="form-group d-flex m-2">
+            <!-- Изменено: удален justify-content-between -->
+            <label class="col-form-label col-3">Сотрудник:</label>
+            <InputSelect @bind-Value="newOperation.EmployeeId">
+                @foreach (var employee in employees)
+                {
+                    <option value="@employee.EmployeeId">@employee.FirstName @employee.LastName @employee.MiddleName</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => newOperation.EmployeeId)" />
+        </div>
+
+        <div class="form-group d-flex m-2">
+            <!-- Изменено: удален justify-content-between -->
+            <label class="col-form-label col-3">Дата:</label>
+            <InputDate id="Date" @bind-Value="newOperation.Date" class="form-control" />
+            <ValidationMessage For="@(() => newOperation.Date)" />
+        </div>
+
+        <div class="form-group d-flex m-2">
+            <!-- Изменено: удален justify-content-between -->
+            <label class="col-form-label col-3">Тип операции:</label>
+            <InputSelect @bind-Value="newOperation.OperationType">
+                @foreach (var type in Enum.GetValues(typeof(OperationType)).Cast<OperationType>())
+                {
+                    <option value="@type">@type</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => newOperation.OperationType)" />
+        </div>
+
+        <div class="form-group d-flex m-2">
+            <!-- Изменено: удален justify-content-between -->
+            <label class="col-form-label col-3">Количество:</label>
+            <InputNumber id="Quantity" @bind-Value="newOperation.Quantity" class="form-control" />
+            <ValidationMessage For="@(() => newOperation.Quantity)" />
+        </div>
+
+        <div class="btn-group d-flex">
+            <!-- Добавлен d-flex для выравнивания кнопок -->
+            <button class="btn btn-primary m-2" type="submit">Сохранить</button>
+            <button class="btn btn-secondary m-2" @onclick="NavigateBack">Отмена</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    <p>Загрузка данных...</p>
+}
+
+@code {
+    [Parameter]
+    public int? OperationId { get; set; }
+
+    [SupplyParameterFromForm]
+    public Operation newOperation { get; set; } = new Operation();
+
+    private IEnumerable<Product>? products;
+    private IEnumerable<Employee>? employees;
+    private string PageTitle => OperationId.HasValue ? "Редактировать операцию" : "Добавить операцию";
+    private string? errorMessage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            products = await inventory.GetProductsAsync();
+            employees = await inventory.GetEmployeesAsync();
+            if (OperationId.HasValue && OperationId > 0)
+            {
+                newOperation = await inventory.GetOperationByIdAsync(OperationId.Value);
+                if (newOperation == null)
+                {
+                    navigation.NavigateTo("/operation");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка загрузки данных: {ex.Message}";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && errorMessage != null)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", errorMessage);
+            errorMessage = null;
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (OperationId.HasValue && OperationId > 0)
+            {
+                await inventory.UpdateOperationAsync(newOperation);
+            }
+            else
+            {
+                await inventory.AddOperationAsync(newOperation);
+            }
+            navigation.NavigateTo("/operation");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка сохранения операции: {ex.Message}";
+        }
+    }
+
+    private void NavigateBack() => navigation.NavigateTo("/operation");
+}

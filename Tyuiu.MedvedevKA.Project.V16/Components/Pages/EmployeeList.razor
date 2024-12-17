@@ -1,0 +1,73 @@
+﻿@page "/employee"
+@rendermode InteractiveServer
+@inject NavigationManager navigate
+@inject IInventoryDataService inventory
+
+<PageTitle>Сотрудники</PageTitle>
+
+<h1>Сотрудники</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Фамилия Имя Отчство</th>
+            <th>Должность</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (employees == null)
+        {
+            <tr>
+                <td colspan="5">Loading...</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var employee in employees)
+            {
+                <tr class="disabled">
+                    <td>@employee.EmployeeId</td>
+                    <td>@employee.FirstName @employee.LastName @employee.MiddleName</td>
+                    <td>@employee.Position</td>
+                    <td><button class="btn btn-danger btn-sm" @onclick="@(() => DeleteEmployee  (employee.EmployeeId))">Удалить</button></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div style="margin-top: 10px; margin-right: 10px;">
+    <button class="btn btn-primary" @onclick="AddEmployee">Добавить Сотрудника</button>
+</div>
+
+@code {
+    IEnumerable<Employee>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        employees = await inventory.GetEmployeesAsync();
+    }
+    
+    void AddEmployee()
+    {
+        navigate.NavigateTo("/employee/add");
+    }
+
+    async Task DeleteEmployee(int employeeId)
+    {
+        try
+        {
+            await inventory.DeleteEmployeeAsync(employeeId);
+            employees = await inventory.GetEmployeesAsync(); // Refresh the product list
+            StateHasChanged(); // Inform Blazor to re-render the UI
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions appropriately (e.g., display an error message)
+            Console.Error.WriteLine($"Error deleting product: {ex.Message}");
+        }
+    }
+}
