@@ -7,6 +7,33 @@
 
 <h1>Инвентарь</h1>
 
+<div class="alert alert-info">
+    <p><strong>Общее количество товаров:</strong> @TotalProductsCount</p>
+    <p><strong>Общая стоимость инвентаря:</strong> @TotalInventoryValue.ToString("C")</p>
+    <p><strong>Количество товаров по категориям:</strong></p>
+    <ul>
+        @foreach (var category in CategoryCounts)
+        {
+            <li>@category.Key: @category.Value</li>
+        }
+    </ul>
+    @if (LowStockProducts != null && LowStockProducts.Any())
+    {
+        <p><strong>Товары с низким запасом:</strong></p>
+        <ul>
+             @foreach (var product in LowStockProducts)
+                {
+                    <li>@product.NameProduct - Количество: @product.Quantity </li>
+                }
+        </ul>
+    }
+    else
+    {
+         <p><strong>Товары с низким запасом:</strong> Нет</p>
+    }
+</div>
+
+
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -109,10 +136,20 @@
     private int? editingProductId;
     private bool isEditing = false;
 
+    public int TotalProductsCount => products?.Count() ?? 0;
+    public decimal TotalInventoryValue => products?.Sum(p => p.Price * p.Quantity) ?? 0;
+    public Dictionary<string, int> CategoryCounts => products?.GroupBy(p => p.Category).ToDictionary(g => g.Key, g => g.Count()) ?? new Dictionary<string, int>();
+     public IEnumerable<Product>? LowStockProducts { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await LoadProducts();
+    }
+     private async Task LoadProducts()
+    {
         products = await inventory.GetProductsAsync();
+        LowStockProducts = products?.Where(p => p.Quantity < 10).ToList();
     }
     private async Task BeginEdit(int productId)
     {
@@ -127,7 +164,7 @@
         if (editingProduct != null)
         {
             await inventory.UpdateProductAsync(editingProduct);
-            products = await inventory.GetProductsAsync();
+             await LoadProducts();
             isEditing = false;
             editingProduct = null;
             StateHasChanged();
@@ -146,14 +183,14 @@
     {
         navigate.NavigateTo("/inventory/add");
     }
-    
+
     async Task DeleteProduct(int productId)
     {
         try
         {
             await inventory.DeleteProductAsync(productId);
-            products = await inventory.GetProductsAsync(); 
-            StateHasChanged(); 
+            await LoadProducts();
+            StateHasChanged();
         }
         catch (Exception ex)
         {
