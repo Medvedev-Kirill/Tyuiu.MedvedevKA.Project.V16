@@ -152,12 +152,11 @@
         try
         {
             await inventory.DeleteProductAsync(productId);
-            products = await inventory.GetProductsAsync(); // Refresh the product list
-            StateHasChanged(); // Inform Blazor to re-render the UI
+            products = await inventory.GetProductsAsync(); 
+            StateHasChanged(); 
         }
         catch (Exception ex)
         {
-            // Handle exceptions appropriately (e.g., display an error message)
             Console.Error.WriteLine($"Error deleting product: {ex.Message}");
         }
     }

@@ -51,7 +51,7 @@
     public int? EmployeeId { get; set; }
 
     [SupplyParameterFromForm]
-    public Employee newEmployee { get; set; } = new Employee(); // Initialize here
+    public Employee newEmployee { get; set; } = new Employee(); 
 
     private string PageTitle => EmployeeId.HasValue ? "Редактировать сотрудника" : "Добавить сотрудника";
 
@@ -59,8 +59,8 @@
     {
         if (EmployeeId.HasValue && EmployeeId > 0)
         {
-            var employees = await inventory.GetEmployeesAsync(); // Await the task here
-            var employee = employees.FirstOrDefault(e => e.EmployeeId == EmployeeId); // Now call FirstOrDefault on IEnumerable
+            var employees = await inventory.GetEmployeesAsync(); 
+            var employee = employees.FirstOrDefault(e => e.EmployeeId == EmployeeId); 
             if (employee != null)
             {
                 newEmployee = employee;

@@ -85,7 +85,7 @@
     async Task HandleValidSubmit()
     {
         
-        if (newProduct != null) // Check for null here
+        if (newProduct != null) 
         {
             if (ProductId.HasValue && ProductId != 0)
             {
@@ -99,7 +99,6 @@
         }
         else
         {
-            // Handle the case where newProduct is unexpectedly null (e.g., log an error)
             Console.Error.WriteLine("Ошибка: значение NewProduct равно null в HandleValidSubmit");
         }
 

@@ -22,7 +22,6 @@
         <InputNumber @bind-Value="newOperation.Id" hidden />
 
         <div class="form-group d-flex m-2">
-            <!-- Изменено: удален justify-content-between -->
             <label class="col-form-label col-3">Товар:</label>
             <InputSelect @bind-Value="newOperation.ProductId">
                 @foreach (var product in products)
@@ -34,7 +33,6 @@
         </div>
 
         <div class="form-group d-flex m-2">
-            <!-- Изменено: удален justify-content-between -->
             <label class="col-form-label col-3">Сотрудник:</label>
             <InputSelect @bind-Value="newOperation.EmployeeId">
                 @foreach (var employee in employees)
@@ -46,14 +44,12 @@
         </div>
 
         <div class="form-group d-flex m-2">
-            <!-- Изменено: удален justify-content-between -->
             <label class="col-form-label col-3">Дата:</label>
             <InputDate id="Date" @bind-Value="newOperation.Date" class="form-control" />
             <ValidationMessage For="@(() => newOperation.Date)" />
         </div>
 
         <div class="form-group d-flex m-2">
-            <!-- Изменено: удален justify-content-between -->
             <label class="col-form-label col-3">Тип операции:</label>
             <InputSelect @bind-Value="newOperation.OperationType">
                 @foreach (var type in Enum.GetValues(typeof(OperationType)).Cast<OperationType>())
@@ -65,14 +61,12 @@
         </div>
 
         <div class="form-group d-flex m-2">
-            <!-- Изменено: удален justify-content-between -->
             <label class="col-form-label col-3">Количество:</label>
             <InputNumber id="Quantity" @bind-Value="newOperation.Quantity" class="form-control" />
             <ValidationMessage For="@(() => newOperation.Quantity)" />
         </div>
 
         <div class="btn-group d-flex">
-            <!-- Добавлен d-flex для выравнивания кнопок -->
             <button class="btn btn-primary m-2" type="submit">Сохранить</button>
             <button class="btn btn-secondary m-2" @onclick="NavigateBack">Отмена</button>
         </div>

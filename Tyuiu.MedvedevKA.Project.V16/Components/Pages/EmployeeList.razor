@@ -61,12 +61,11 @@
         try
         {
             await inventory.DeleteEmployeeAsync(employeeId);
-            employees = await inventory.GetEmployeesAsync(); // Refresh the product list
-            StateHasChanged(); // Inform Blazor to re-render the UI
+            employees = await inventory.GetEmployeesAsync(); 
+            StateHasChanged(); 
         }
         catch (Exception ex)
         {
-            // Handle exceptions appropriately (e.g., display an error message)
             Console.Error.WriteLine($"Error deleting product: {ex.Message}");
         }
     }
