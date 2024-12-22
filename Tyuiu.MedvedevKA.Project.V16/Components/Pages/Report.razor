@@ -31,8 +31,8 @@
             {
                 <tr>
                     <td>@sale.SaleId</td>
-                    <td>@(sale.Product != null ? sale.Product.NameProduct : "Товар не найден")</td>  
-                    <td>@(sale.Employee != null ? sale.Employee.FirstName + " " + sale.Employee.LastName : "Сотрудник не найден")</td> 
+                    <td>@(sale.Product != null ? sale.Product.NameProduct : "Товар не найден")</td>
+                    <td>@(sale.Employee != null ? sale.Employee.FirstName + " " + sale.Employee.LastName : "Сотрудник не найден")</td>
                     <td>@sale.SaleDate.ToShortDateString()</td>
                     <td>@sale.Quantity</td>
                     <td>@sale.Price.ToString("C")</td>
@@ -54,8 +54,8 @@
 }
 
 @code {
-    private DateTime StartDate { get; set; } = DateTime.Now.AddMonths(-1); 
-    private DateTime EndDate { get; set; } = DateTime.Now;               
+    private DateTime StartDate { get; set; } = DateTime.Now.AddMonths(-1);
+    private DateTime EndDate { get; set; } = DateTime.Now;
     private IEnumerable<Sale>? salesReport;
     private string? errorMessage;
     private decimal TotalSales = 0;
@@ -64,15 +64,32 @@
     {
         try
         {
+            Console.WriteLine($"Запрос данных с {StartDate} по {EndDate}");
             salesReport = await SalesDataService.GetSalesAsync(StartDate, EndDate);
+
+            if (salesReport == null || !salesReport.Any())
+            {
+                errorMessage = "Нет данных для отображения.";
+                Console.WriteLine("Нет данных");
+                TotalSales = 0;
+                salesReport = null;
+                StateHasChanged();
+                return;
+            }
+            Console.WriteLine($"Получено {salesReport.Count()} записей.");
+
             TotalSales = salesReport.Sum(s => s.Price * s.Quantity);
             errorMessage = null;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Ошибка: {ex}");
             errorMessage = $"Ошибка: {ex.Message}";
             salesReport = null;
             TotalSales = 0;
+            StateHasChanged();
         }
     }
 }
+

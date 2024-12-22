@@ -60,9 +60,9 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
            ]);
 
             builder.Entity<Sale>().HasData([
-               new() { SaleId = 1, SaleDate = DateTime.Now.AddDays(-5), ProductId = 1, EmployeeId = 1, Quantity = 2, Price = 10.99m },
-               new() { SaleId = 2, SaleDate = DateTime.Now.AddDays(-3), ProductId = 2, EmployeeId = 2, Quantity = 1, Price = 25.50m }
-           ]);
+                new() { SaleId = 1, SaleDate = DateTime.Now.AddDays(-5).Date, ProductId = 1, EmployeeId = 1, Quantity = 2, Price = 10.99m },
+                new() { SaleId = 2, SaleDate = DateTime.Now.AddDays(-3).Date, ProductId = 2, EmployeeId = 2, Quantity = 1, Price = 25.50m }
+        ]);
         }
     }
 }
