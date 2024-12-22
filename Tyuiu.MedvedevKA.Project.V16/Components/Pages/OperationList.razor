@@ -18,6 +18,7 @@
             <th>Количество</th>
             <th>Товар</th>
             <th>Сотрудник</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -35,7 +36,7 @@
                     <td>@operation.Id</td>
                     <td>@operation.ProductId.</td>
                     <td>@operation.EmployeeId</td>
-                    <td>@operation.Date</td>
+                    <td>@operation.Date.ToShortDateString()</td>
                     <td>@operation.OperationType</td>
                     <td>@operation.Quantity</td>
                     <td>@operation.NameProduct.NameProduct</td>

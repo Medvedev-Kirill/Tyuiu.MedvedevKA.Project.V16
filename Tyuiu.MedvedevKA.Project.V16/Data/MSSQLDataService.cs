@@ -128,44 +128,7 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
 
         }
 
-        public async Task<string> GenerateSalesReportAsync(DateTime startDate, DateTime endDate)
-        {
-            try
-            {
-                var sales = await GetSalesAsync(startDate, endDate);
-
-                if (!sales.Any())
-                {
-                    return "За указанный период продажи отсутствуют.";
-                }
-
-                var report = new StringBuilder();
-                report.AppendLine($"Отчет о продажах с {startDate.ToShortDateString()} по {endDate.ToShortDateString()}\n");
-                report.AppendLine("-------------------------------------------------------------------------\n");
-                report.AppendLine("| ID продажи | Товар          | Сотрудник      | Дата продажи    | Кол-во | Цена     |\n");
-                report.AppendLine("-------------------------------------------------------------------------\n");
-
-                CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("ru-RU");
-
-                foreach (var sale in sales)
-                {
-                    string productName = sale.Product?.NameProduct ?? "Неизвестный товар";
-                    string employeeName = $"{sale.Employee?.FirstName ?? "Неизвестный сотрудник"} {sale.Employee?.LastName ?? ""}";
-
-                    report.AppendLine($"| {sale.SaleId,11} | {productName,-15} | {employeeName,-15} | {sale.SaleDate.ToShortDateString(),16} | {sale.Quantity,6} | {sale.Price.ToString("C", cultureInfo),8} |");
-                }
-
-                report.AppendLine("-------------------------------------------------------------------------\n");
-                decimal totalSales = sales.Sum(s => s.Price * s.Quantity);
-                report.AppendLine($"Общая сумма продаж: {totalSales.ToString("C", cultureInfo)}\n");
-
-                return report.ToString();
-            }
-            catch (Exception ex)
-            {
-                return $"Произошла ошибка при генерации отчета: {ex.Message}";
-            }
-        }
+        
         public async Task UpdateEmployeeAsync(Employee employee)
         {
             context.Employees.Update(employee);

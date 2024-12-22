@@ -1,64 +1,78 @@
 ﻿@page "/report"
 @inject ISalesDataService SalesDataService
+@inject NavigationManager NavigationManager
 
 <h3>Отчет о продажах</h3>
 
-<EditForm Model="@reportParameters" OnValidSubmit="GenerateReport" @key=1>
-    <!-- Added unique key -->
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<div>
+    <label for="startDate">Дата начала:</label>
+    <input type="date" id="startDate" @bind="StartDate" />
+    <label for="endDate">Дата окончания:</label>
+    <input type="date" id="endDate" @bind="EndDate" />
+    <button @onclick="GenerateReport">Сгенерировать отчет</button>
+</div>
 
-    <div class="form-group">
-        <label for="startDate">Дата начала:</label>
-        <InputDate id="startDate" @bind-Value="reportParameters.StartDate" />
-    </div>
-
-    <div class="form-group">
-        <label for="endDate">Дата окончания:</label>
-        <InputDate id="endDate" @bind-Value="reportParameters.EndDate" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Сгенерировать отчет НЕ РАБОТАЕТ</button>
-</EditForm>
-
-@if (reportResult == null)
+@if (salesReport != null)
 {
-    <p><em>Пожалуйста, укажите даты для генерации отчета.</em></p>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID продажи</th>
+                <th>Товар</th>
+                <th>Сотрудник</th>
+                <th>Дата продажи</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Общая стоимость</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sale in salesReport)
+            {
+                <tr>
+                    <td>@sale.SaleId</td>
+                    <td>@(sale.Product != null ? sale.Product.NameProduct : "Товар не найден")</td>  
+                    <td>@(sale.Employee != null ? sale.Employee.FirstName + " " + sale.Employee.LastName : "Сотрудник не найден")</td> 
+                    <td>@sale.SaleDate.ToShortDateString()</td>
+                    <td>@sale.Quantity</td>
+                    <td>@sale.Price.ToString("C")</td>
+                    <td>@((sale.Price * sale.Quantity).ToString("C"))</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6"><b>Итого:</b></td>
+                <td><b>@TotalSales.ToString("C")</b></td>
+            </tr>
+        </tfoot>
+    </table>
 }
-else
+@if (errorMessage != null)
 {
-    @if (reportResult == "За указанный период продажи отсутствуют.")
-    {
-        <p><em>@reportResult</em></p>
-    }
-    else
-    {
-        <pre>@reportResult</pre>
-    }
+    <p style="color: red;">@errorMessage</p>
 }
-
 
 @code {
-    private ReportParameters reportParameters = new();
-    private string? reportResult;
+    private DateTime StartDate { get; set; } = DateTime.Now.AddMonths(-1); 
+    private DateTime EndDate { get; set; } = DateTime.Now;               
+    private IEnumerable<Sale>? salesReport;
+    private string? errorMessage;
+    private decimal TotalSales = 0;
 
     private async Task GenerateReport()
     {
         try
         {
-            reportResult = await SalesDataService.GenerateSalesReportAsync(reportParameters.StartDate, reportParameters.EndDate);
+            salesReport = await SalesDataService.GetSalesAsync(StartDate, EndDate);
+            TotalSales = salesReport.Sum(s => s.Price * s.Quantity);
+            errorMessage = null;
         }
         catch (Exception ex)
         {
-            reportResult = $"Произошла ошибка: {ex.Message}";
+            errorMessage = $"Ошибка: {ex.Message}";
+            salesReport = null;
+            TotalSales = 0;
         }
     }
-
-    public class ReportParameters
-    {
-        public DateTime StartDate { get; set; } = DateTime.Now.AddMonths(-1);
-        public DateTime EndDate { get; set; } = DateTime.Now;
-    }
 }
-
-

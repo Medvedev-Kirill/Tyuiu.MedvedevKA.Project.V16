@@ -33,13 +33,66 @@
             {
                 <tr>
                     <td>@product.ProductId</td>
-                    <td>@product.NameProduct</td>
-                    <td>@product.Description</td>
-                    <td>@product.Price</td>
-                    <td>@product.Quantity</td>
-                    <td>@product.Unit</td>
-                    <td>@product.Category</td>
-                    <td><button class="btn btn-danger btn-sm" @onclick="@(() => DeleteProduct(product.ProductId))">Удалить</button></td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="text" @bind="editingProduct.NameProduct" />
+                        }
+                        else
+                        {
+                            @product.NameProduct
+                        }</td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="text" @bind="editingProduct.Description" />
+                        }
+                        else
+                        {
+                            @product.Description
+                        }</td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="number" @bind="editingProduct.Price" />
+                        }
+                        else
+                        {
+                            @product.Price
+                        }</td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="number" @bind="editingProduct.Quantity" />
+                        }
+                        else
+                        {
+                            @product.Quantity
+                        }</td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="text" @bind="editingProduct.Unit" />
+                        }
+                        else
+                        {
+                            @product.Unit
+                        }</td>
+                    <td>@if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <input type="text" @bind="editingProduct.Category" />
+                        }
+                        else
+                        {
+                            @product.Category
+                        }</td>
+                    <td>
+                        @if (editingProduct != null && editingProduct.ProductId == product.ProductId)
+                        {
+                            <button class="btn btn-success btn-sm" @onclick="SaveChanges">Сохранить</button>
+                            <button class="btn btn-secondary btn-sm" @onclick="CancelEdit">Отменить</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-warning btn-sm" @onclick="@(() => BeginEdit(product.ProductId))">Редактировать</button>
+                            <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteProduct(product.ProductId))">Удалить</button>
+                        }
+                    </td>
                 </tr>
             }
         }
@@ -52,12 +105,42 @@
 
 @code {
     IEnumerable<Product>? products;
+    private Product? editingProduct;
+    private int? editingProductId;
+    private bool isEditing = false;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         products = await inventory.GetProductsAsync();
     }
+    private async Task BeginEdit(int productId)
+    {
+        editingProductId = productId;
+        editingProduct = products.FirstOrDefault(p => p.ProductId == productId);
+        isEditing = true;
+        StateHasChanged();
+    }
+
+    private async Task SaveChanges()
+    {
+        if (editingProduct != null)
+        {
+            await inventory.UpdateProductAsync(editingProduct);
+            products = await inventory.GetProductsAsync();
+            isEditing = false;
+            editingProduct = null;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+        editingProduct = null;
+        StateHasChanged();
+    }
+
 
     void AddProduct()
     {
