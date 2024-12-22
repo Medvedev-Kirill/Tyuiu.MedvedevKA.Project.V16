@@ -33,14 +33,16 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
                 .HasForeignKey(o => o.EmployeeId);
 
             builder.Entity<Sale>()
-                .HasOne(s => s.Product)
-                .WithMany()
-                .HasForeignKey(s => s.ProductId);
+               .HasOne(s => s.Product)
+               .WithMany()
+               .HasForeignKey(s => s.ProductId);
 
             builder.Entity<Sale>()
                 .HasOne(s => s.Employee)
                 .WithMany()
                 .HasForeignKey(s => s.EmployeeId);
+
+
 
             base.OnModelCreating(builder);
 
@@ -56,13 +58,12 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
 
             builder.Entity<Operation>().HasData([
                new() { Id = 1, Date = DateTime.Now.AddDays(-2), OperationType = OperationType.Принесли, Quantity = 100, ProductId = 1, EmployeeId = 1  },
-                new() { Id = 2, Date = DateTime.Now.AddDays(-1), OperationType = OperationType.Унесли, Quantity = 5 , ProductId = 2, EmployeeId = 2}
+                new() { Id = 2, Date = DateTime.Now.AddDays(-1), OperationType = OperationType.Унесли, Quantity = 5 , ProductId = 2, EmployeeId = 2 }
            ]);
-
             builder.Entity<Sale>().HasData([
-                new() { SaleId = 1, SaleDate = DateTime.Now.AddDays(-5).Date, ProductId = 1, EmployeeId = 1, Quantity = 2, Price = 10.99m },
-                new() { SaleId = 2, SaleDate = DateTime.Now.AddDays(-3).Date, ProductId = 2, EmployeeId = 2, Quantity = 1, Price = 25.50m }
-        ]);
+                new() { SaleId = 1, Date = DateTime.Now.AddDays(-1), Price = 10.99m, Quantity = 2, ProductId = 1, EmployeeId = 2 },
+                new() { SaleId = 2, Date = DateTime.Now.AddDays(-1), Price = 25.50m, Quantity = 1, ProductId = 2, EmployeeId = 1 }
+           ]);
         }
     }
 }

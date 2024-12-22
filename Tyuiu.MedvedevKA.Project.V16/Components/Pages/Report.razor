@@ -12,7 +12,7 @@
     <button @onclick="GenerateReport">Сгенерировать отчет</button>
 </div>
 
-@if (salesReport != null)
+@if (salesReport != null && salesReport.Any())
 {
     <table class="table table-bordered">
         <thead>
@@ -31,9 +31,9 @@
             {
                 <tr>
                     <td>@sale.SaleId</td>
-                    <td>@(sale.Product != null ? sale.Product.NameProduct : "Товар не найден")</td>
-                    <td>@(sale.Employee != null ? sale.Employee.FirstName + " " + sale.Employee.LastName : "Сотрудник не найден")</td>
-                    <td>@sale.SaleDate.ToShortDateString()</td>
+                    <td>@(sale.Product?.NameProduct ?? "Товар не найден")</td>
+                    <td>@(sale.Employee != null ? $"{sale.Employee.FirstName} {sale.Employee.LastName}" : "Сотрудник не найден")</td>
+                    <td>@sale.Date.ToShortDateString()</td>
                     <td>@sale.Quantity</td>
                     <td>@sale.Price.ToString("C")</td>
                     <td>@((sale.Price * sale.Quantity).ToString("C"))</td>
@@ -48,9 +48,13 @@
         </tfoot>
     </table>
 }
-@if (errorMessage != null)
+else if (errorMessage != null)
 {
     <p style="color: red;">@errorMessage</p>
+}
+else if (salesReport != null && !salesReport.Any())
+{
+    <p>Нет данных за выбранный период.</p>
 }
 
 @code {
@@ -60,31 +64,33 @@
     private string? errorMessage;
     private decimal TotalSales = 0;
 
+    protected override void OnInitialized()
+    {
+        //При запуске компонента получаем данные за последнии 30 дней
+        GenerateReport();
+    }
+
     private async Task GenerateReport()
     {
         try
         {
-            Console.WriteLine($"Запрос данных с {StartDate} по {EndDate}");
             salesReport = await SalesDataService.GetSalesAsync(StartDate, EndDate);
-
             if (salesReport == null || !salesReport.Any())
             {
                 errorMessage = "Нет данных для отображения.";
-                Console.WriteLine("Нет данных");
                 TotalSales = 0;
-                salesReport = null;
                 StateHasChanged();
                 return;
             }
-            Console.WriteLine($"Получено {salesReport.Count()} записей.");
 
             TotalSales = salesReport.Sum(s => s.Price * s.Quantity);
             errorMessage = null;
+
             StateHasChanged();
+
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка: {ex}");
             errorMessage = $"Ошибка: {ex.Message}";
             salesReport = null;
             TotalSales = 0;
@@ -92,4 +98,3 @@
         }
     }
 }
-

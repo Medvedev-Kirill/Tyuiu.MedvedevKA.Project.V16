@@ -121,7 +121,6 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
         public async Task<IEnumerable<Sale>> GetSalesAsync(DateTime startDate, DateTime endDate)
         {
             return await context.Sales
-                .Where(s => s.SaleDate.Date >= startDate.Date && s.SaleDate.Date <= endDate.Date)
                 .Include(s => s.Product)
                 .Include(s => s.Employee)
                 .ToListAsync();

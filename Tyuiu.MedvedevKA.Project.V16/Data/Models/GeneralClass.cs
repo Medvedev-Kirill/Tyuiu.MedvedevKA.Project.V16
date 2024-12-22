@@ -62,14 +62,15 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data.Models
 
     public class Sale
     {
+        [Key]
         public int SaleId { get; set; }
-        public int ProductId { get; set; }
-        public int EmployeeId { get; set; }
-        public DateTime SaleDate { get; set; }
+        public DateTime Date { get; set; }
+        public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public decimal Price { get; set; } 
-
-        public Product Product { get; set; } = null!;
-        public Employee Employee { get; set; } = null!;
+        public int ProductId { get; set; }
+        public virtual Product Product { get; set; } = null!;
+        public int EmployeeId { get; set; }
+        public virtual Employee Employee { get; set; } = null!;
     }
+
 }
