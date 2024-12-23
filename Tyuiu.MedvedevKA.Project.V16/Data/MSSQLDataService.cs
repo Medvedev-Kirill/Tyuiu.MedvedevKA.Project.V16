@@ -10,7 +10,6 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
 {
     public class MSSQLDataService(ApplicationDbContext context) : IInventoryDataService,ISalesDataService
     {
-
         public async Task AddEmployeeAsync(Employee employee)
         {
             await using (var transaction = await context.Database.BeginTransactionAsync()) // Add transaction for atomicity
@@ -90,6 +89,7 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
                 await context.SaveChangesAsync();
             }
         }
+        
         public async Task DeleteOperationAsync(int operationId)
         {
             var operation = await context.Operations.FindAsync(operationId);
@@ -149,6 +149,5 @@ namespace Tyuiu.MedvedevKA.Project.V16.Data
         {
             return await context.Operations.FindAsync(operationId);
         }
-
     }
 }
